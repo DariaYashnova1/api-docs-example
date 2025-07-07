@@ -93,7 +93,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "401":
-          description: Токен отсутствует, истёк или некорректен
+          description: Токн отсутствует, истёк или некорректен
           content:
             application/json:
               schema:
