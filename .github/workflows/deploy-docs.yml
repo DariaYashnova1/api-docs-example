@@ -1,0 +1,55 @@
+# .github/workflows/deploy-docs.yml
+
+# Название нашего workflow, будет отображаться в разделе "Actions" на GitHub
+name: Deploy API Docs to GitHub Pages
+
+# Триггер: когда запускать этот workflow
+on:
+  push:
+    branches:
+      # Запускать только при пуше в ветку main (или master, если у тебя так)
+      - main
+    paths:
+      # И только если изменился файл api.yml
+      - 'api.yml'
+
+# Задачи (jobs), которые нужно выполнить
+jobs:
+  # Название нашей единственной задачи
+  build-and-deploy:
+    # На какой операционной системе будет работать
+    runs-on: ubuntu-latest
+    
+    # Шаги (steps), из которых состоит задача
+    steps:
+      # 1. Клонируем репозиторий
+      # Это стандартное действие, чтобы наш workflow получил доступ к коду
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Node.js, так как redoc-cli работает на нём
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Используем стабильную версию Node.js
+
+      # 3. Устанавливаем саму утилиту redoc-cli
+      - name: Install Redoc CLI
+        run: npm install -g redoc-cli
+
+      # 4. Собираем HTML-файл из нашего api.yml
+      # Команда "bundle" собирает всё в один красивый HTML
+      # -o index.html — указываем, что итоговый файл должен называться index.html
+      - name: Build HTML from OpenAPI spec
+        run: redoc-cli bundle api.yml -o index.html
+
+      # 5. Деплоим собранный сайт на GitHub Pages
+      # Мы используем готовый action, который делает всю грязную работу:
+      # создает ветку gh-pages, комитит туда наш index.html и пушит на GitHub
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # Токен для аутентификации, GitHub предоставляет его автоматически
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Папка, которую нужно опубликовать. Так как index.html лежит в корне, указываем "."
+          publish_dir: .
