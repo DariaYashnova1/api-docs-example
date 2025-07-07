@@ -17,7 +17,7 @@ tags:
 paths:
   /auth/login:
     post:
-      summary: Аутентификация пользователя
+      summary:  пользователя
       description: Возвращает JWT токен при успешной аутентификации.
       tags: [Auth]
       operationId: loginUser
